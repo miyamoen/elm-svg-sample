@@ -2,18 +2,32 @@ module Main exposing (..)
 
 import Html exposing (Html, text, div, img)
 import Html.Attributes exposing (src)
+import Graphics.Render as Render exposing (..)
+import Color exposing (Color)
 
 
 ---- MODEL ----
 
 
 type alias Model =
-    {}
+    { bars : List Bar }
+
+
+type alias Bar =
+    { value : Float, fill : Color }
+
+
+chartData : List Bar
+chartData =
+    [ Bar 100 Color.blue
+    , Bar 20 Color.red
+    , Bar 10 Color.green
+    ]
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( {}, Cmd.none )
+    ( { bars = chartData }, Cmd.none )
 
 
 
@@ -33,12 +47,38 @@ update msg model =
 ---- VIEW ----
 
 
+svgHeight : number
+svgHeight =
+    120
+
+
+svgWidth : number
+svgWidth =
+    340
+
+
+barWidth : number
+barWidth =
+    100
+
+
+barInterval : number
+barInterval =
+    20
+
+
 view : Model -> Html Msg
-view model =
-    div []
-        [ img [ src "/logo.svg" ] []
-        , div [] [ text "Your Elm App is working!" ]
-        ]
+view { bars } =
+    List.indexedMap bar bars
+        |> group
+        |> svg 0 0 svgWidth svgHeight
+
+
+bar : Int -> Bar -> Form msg
+bar i { value, fill } =
+    rectangle barWidth value
+        |> filled (solid fill)
+        |> position ( i * barWidth + i * barInterval + barWidth // 2 |> toFloat, svgHeight - value / 2 )
 
 
 
